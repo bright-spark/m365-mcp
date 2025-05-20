@@ -22,4 +22,4 @@ ENV NODE_ENV=production \
     PORT=3000
 
 # Run the application
-CMD ["node", "outlook-mcp-server.js"]
+CMD ["node", "m365-mcp.js"]
