@@ -1,6 +1,6 @@
 # MCP API Documentation
 
-This document provides detailed information about the Model Context Protocol (MCP) API endpoints available in the Outlook MCP Server.
+This document provides detailed information about the Model Context Protocol (MCP) API endpoints available in the Microsoft 365 MCP Server.
 
 ## Base URL
 

@@ -1,7 +1,7 @@
 {
   "name": "m365-mcp",
   "version": "1.0.0",
-  "description": "Model Context Protocol server for Microsoft Outlook with browser-based authentication",
+  "description": "Model Context Protocol server for Microsoft 365 with browser-based authentication",
   "main": "m365-mcp.js",
   "scripts": {
     "start": "node m365-mcp.js",
@@ -25,14 +25,17 @@
     "@types/morgan": "^1.9.9",
     "@types/passport": "^1.0.17",
     "body-parser": "^2.2.0",
+    "connect-redis": "^8.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express-rate-limit": "^7.5.0",
     "express-session": "^1.18.1",
     "express-validator": "^7.2.1",
+    "ioredis": "^5.6.1",
     "morgan": "^1.10.0",
     "openid-client": "^6.5.0",
     "passport": "^0.7.0",
+    "redis": "^5.1.0",
     "simple-oauth2": "^5.1.0",
     "zod": "^3.25.7"
   },

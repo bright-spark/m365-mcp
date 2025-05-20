@@ -6,28 +6,37 @@ services:
     container_name: m365-mcp
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     environment:
-      - NODE_ENV=production
-      - CLIENT_ID=your-client-id
-      - SESSION_SECRET=your-session-secret
-      - REDIRECT_URI=http://localhost:3000/auth/callback
+      - NODE_ENV=development
+      - PORT=3000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_TLS=false
+      - COOKIE_DOMAIN=localhost
+      - LOG_LEVEL=info
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX=100
+      - CORS_ORIGIN=http://localhost:3000
+      - CORS_CREDENTIALS=true
     volumes:
+      - ./.env:/app/.env
       - ./data:/app/data
     restart: unless-stopped
-    # Uncomment if using a Redis session store in production
-    # depends_on:
-    #   - redis
-  
-  # Uncomment for production use with Redis session store
-  # redis:
-  #   image: redis:alpine
-  #   container_name: outlook-mcp-redis
-  #   ports:
-  #     - "6379:6379"
-  #   volumes:
-  #     - redis-data:/data
-  #   restart: unless-stopped
+    depends_on:
+      - redis
+      
+  redis:
+    image: redis:alpine
+    container_name: outlook-mcp-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    restart: unless-stopped
 
-# Uncomment for production use with Redis session store
-# volumes:
-#   redis-data:
+volumes:
+  redis-data:

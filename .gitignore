@@ -126,3 +126,4 @@ storybook-static
 
 # Optional cache
 .cache/
+.env

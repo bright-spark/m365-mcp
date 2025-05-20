@@ -1,9 +1,9 @@
-# Microsoft 365 (M365) MCP
+# Microsoft 365 MCP
 
-Welcome to the Microsoft 365 (M365) MCP project!
+Welcome to the Microsoft 365 MCP project!
 
 ## Overview
-This project implements an MCP (Multi-Cloud Platform) integration for Microsoft 365 (M365). It provides tools, scripts, and configurations to interact with Microsoft 365 services in a multi-cloud or hybrid environment.
+This project implements an MCP (Multi-Cloud Platform) integration for Microsoft 365. It provides tools, scripts, and configurations to interact with Microsoft 365 services in a multi-cloud or hybrid environment.
 
 ## Features
 - Integrates Microsoft 365 with MCP workflows
@@ -14,7 +14,7 @@ This project implements an MCP (Multi-Cloud Platform) integration for Microsoft 
 ## Getting Started
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/your-org/m365-mcp.git
+   git clone https://github.com/bright-spark/m365-mcp.git
    cd m365-mcp
    ```
 2. **Install dependencies:**
@@ -53,8 +53,8 @@ You can connect this server to any MCP-compatible client (such as Cursor) using 
 ### Example mcp.json
 ```json
 {
-  "name": "Outlook MCP Server",
-  "description": "Model Context Protocol server for Microsoft Outlook with browser-based authentication",
+  "name": "Microsoft 365 MCP Server",
+  "description": "Model Context Protocol server for Microsoft 365 with browser-based authentication",
   "url": "http://localhost:3000/v2/mcp",
   "version": "1.0.0",
   "type": "http"

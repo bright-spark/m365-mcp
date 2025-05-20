@@ -127,7 +127,7 @@ function createApp() {
     res.send(`
       <html>
         <head>
-          <title>Outlook MCP Server</title>
+          <title>Microsoft 365 MCP Server</title>
           <style>
             body {
               font-family: Arial, sans-serif;
@@ -172,8 +172,8 @@ function createApp() {
         </head>
         <body>
           <div class="header">
-            <h1>Microsoft Outlook MCP Server</h1>
-            <p>Model Context Protocol server for Outlook integration</p>
+            <h1>Microsoft 365 MCP Server</h1>
+            <p>Model Context Protocol server for Microsoft 365</p>
           </div>
           
           <div class="container">
@@ -849,7 +849,7 @@ function createApp() {
   
   // Initialize MCP Server
   const server = new McpServer({
-    name: 'M365 MCP Server',
+    name: 'Microsoft 365 MCP Server',
     version: '1.0.0'
   });
   
