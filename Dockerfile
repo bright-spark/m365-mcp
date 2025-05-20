@@ -5,8 +5,9 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
-RUN pnpm install
+# Install pnpm globally and then install dependencies
+RUN npm install -g pnpm \
+    && pnpm install
 
 # Copy app source
 COPY . .
