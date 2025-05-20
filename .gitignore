@@ -1,6 +1,5 @@
 # Node.js
 node_modules/
-__mocks__
 .env.local
 .env.test
 

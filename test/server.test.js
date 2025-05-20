@@ -18,6 +18,7 @@ jest.mock('@modelcontextprotocol/sdk/server/mcp', () => ({
 }));
 
 // Mock other dependencies
+jest.mock('express');
 jest.mock('express-session');
 jest.mock('cors');
 jest.mock('helmet');
