@@ -1,5 +1,5 @@
 {
-  "name": "outlook-mcp-server",
+  "name": "m365-mcp",
   "version": "1.0.0",
   "description": "Model Context Protocol server for Microsoft Outlook with browser-based authentication",
   "main": "m365-mcp.js",
@@ -52,11 +52,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/outlook-mcp-server.git"
+    "url": "git+https://github.com/bright-spark/m365-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/outlook-mcp-server/issues"
+    "url": "https://github.com/bright-spark/m365-mcp/issues"
   },
-  "homepage": "https://github.com/yourusername/outlook-mcp-server#readme",
+  "homepage": "https://github.com/bright-spark/m365-mcp#readme",
   "type": "module"
 }

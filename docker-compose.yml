@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  outlook-mcp-server:
+  m365-mcp:
     build: .
-    container_name: outlook-mcp-server
+    container_name: m365-mcp
     ports:
       - "3000:3000"
     environment:

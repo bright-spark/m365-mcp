@@ -1180,6 +1180,22 @@ function createApp() {
     })
   );
 
+  // Alias for Smithery: POST /mcp (same logic as /v2/mcp)
+  app.post('/mcp',
+    express.json(),
+    wrapAsync(async (req, res) => {
+      try {
+        const result = await server.handleRequest(req.body);
+        res.json(result);
+      } catch (error) {
+        res.status(500).json({
+          error: 'Failed to process request',
+          details: error.message
+        });
+      }
+    })
+  );
+
   return app;
 }
 
