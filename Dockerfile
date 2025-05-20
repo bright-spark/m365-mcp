@@ -1,0 +1,25 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy app source
+COPY . .
+
+# Create volume for persistent data
+VOLUME /app/data
+
+# Expose the server port
+EXPOSE 3000
+
+# Set environment variables (these will be overridden in production)
+ENV NODE_ENV=production \
+    PORT=3000
+
+# Run the application
+CMD ["node", "outlook-mcp-server.js"]
