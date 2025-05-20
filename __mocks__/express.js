@@ -16,4 +16,4 @@ const express = () => {
 express.static = jest.fn();
 express.json = jest.fn();
 
-export default express;
+module.exports = express;

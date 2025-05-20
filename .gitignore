@@ -11,6 +11,16 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# MCP
+.mcp/
+
+# MCP Server
+.mcp-server/
+
+# Test
+test/
+__mocks__/
+
 # Runtime data
 pids
 *.pid

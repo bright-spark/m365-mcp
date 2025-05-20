@@ -1,22 +1,25 @@
-const express = require('express');
-const session = require('express-session');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const helmet = require('helmet');
-const path = require('path');
-const winston = require('winston');
-const { Client } = require('@microsoft/microsoft-graph-client');
-const { AuthorizationCodePKCE, RefreshToken } = require('simple-oauth2');
-const { McpServer } = require('@modelcontextprotocol/sdk/server/mcp');
-const { z } = require('zod');
-const crypto = require('crypto');
-const fs = require('fs');
-const dotenv = require('dotenv');
-const { body, validationResult } = require('express-validator');
-const rateLimit = require('express-rate-limit');
-  
+import express from 'express';
+import session from 'express-session';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import helmet from 'helmet';
+import path from 'path';
+import winston from 'winston';
+import { Client } from '@microsoft/microsoft-graph-client';
+import simpleOauth2 from 'simple-oauth2';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { z } from 'zod';
+import crypto from 'crypto';
+import fs from 'fs';
+import dotenv from 'dotenv';
+import { body, validationResult } from 'express-validator';
+import { fileURLToPath } from 'url';
+
 // Load environment variables
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configuration
 const config = {
@@ -50,57 +53,75 @@ const scopes = [
 // TODO: Use a persistent and secure store for tokens in production (e.g., Redis, encrypted DB)
 const userTokens = {};
 
-// Initialize Express app
-const app = express();
+// Simple custom rate limiter middleware (per IP, 100 requests per 15 minutes)
+const rateLimitWindowMs = 15 * 60 * 1000; // 15 minutes
+const rateLimitMax = 100;
+const ipRateLimits = new Map();
 
-// Security headers
-app.use(helmet());
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false
-});
-app.use(limiter);
-
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true
-}));
-app.use(bodyParser.json());
-app.use(session({
-  secret: config.sessionSecret,
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: process.env.NODE_ENV === 'production' }
-}));
-
-// Serve static files
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Logger setup
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' })
-  ]
-});
-
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple()
-  }));
+function customRateLimiter(req, res, next) {
+  const now = Date.now();
+  const ip = req.ip;
+  let entry = ipRateLimits.get(ip);
+  if (!entry || now - entry.start > rateLimitWindowMs) {
+    entry = { count: 1, start: now };
+    ipRateLimits.set(ip, entry);
+  } else {
+    entry.count++;
+  }
+  if (entry.count > rateLimitMax) {
+    res.status(429).json({ error: 'Too many requests, please try again later.' });
+    return;
+  }
+  next();
 }
 
-// Create a simple home page with login link
-app.get('/', (req, res) => {
+// Wrap all initialization code inside createApp
+function createApp() {
+  // Initialize Express app
+  const app = express();
+
+  // Security headers
+  app.use(helmet());
+
+  // Rate limiting
+  app.use(customRateLimiter);
+
+  app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+  }));
+  app.use(bodyParser.json());
+  app.use(session({
+    secret: config.sessionSecret,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: process.env.NODE_ENV === 'production' }
+  }));
+
+  // Serve static files
+  app.use(express.static(path.join(__dirname, 'public')));
+
+  // Logger setup
+  const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.json()
+    ),
+    transports: [
+      new winston.transports.File({ filename: 'error.log', level: 'error' }),
+      new winston.transports.File({ filename: 'combined.log' })
+    ]
+  });
+
+  if (process.env.NODE_ENV !== 'production') {
+    logger.add(new winston.transports.Console({
+      format: winston.format.simple()
+    }));
+  }
+
+  // Create a simple home page with login link
+  app.get('/', (req, res) => {
     const isLoggedIn = !!(req.session.userId && userTokens[req.session.userId]);
     
     res.send(`
@@ -671,7 +692,8 @@ app.get('/', (req, res) => {
   }
   
   // Create the OAuth2 PKCE client
-  const oauth2 = new AuthorizationCodePKCE({
+  const { AuthorizationCode, RefreshToken } = simpleOauth2;
+  const oauth2 = new AuthorizationCode({
     client: {
       id: config.clientId
     },
@@ -1156,23 +1178,25 @@ app.get('/', (req, res) => {
         });
       }
     })
-);
-  
-  // Start the server
+  );
+
+  return app;
+}
+
+// Only start the server if this file is run directly (ESM equivalent)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const app = createApp();
   const port = process.env.PORT || 3000;
   const serverInstance = app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
   });
-  
-  // Make the HTTP server instance available on the Express app for testing
   app.set('server', serverInstance);
-  
-  // Handle server shutdown
   process.on('SIGTERM', () => {
     console.log('SIGTERM received. Shutting down gracefully');
     serverInstance.close(() => {
       console.log('Process terminated');
     });
   });
-  
-  module.exports = app;
+}
+
+export { createApp };

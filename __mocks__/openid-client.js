@@ -1,5 +1,5 @@
 // Mock for openid-client
-class MockAuthorizationCodePKCE {
+class MockAuthorizationCode {
   constructor(config) {
     this.config = config;
     this.authorizationCode = {
@@ -45,5 +45,5 @@ module.exports = {
     state: jest.fn().mockReturnValue('test-state'),
     codeVerifier: jest.fn().mockReturnValue('test-code-verifier')
   },
-  AuthorizationCodePKCE: MockAuthorizationCodePKCE
+  AuthorizationCode: MockAuthorizationCode
 };

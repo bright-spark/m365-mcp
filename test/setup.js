@@ -1,5 +1,5 @@
-// Mock the AuthorizationCodePKCE class before the app loads
-class MockAuthorizationCodePKCE {
+// Mock the AuthorizationCode class before the app loads
+class MockAuthorizationCode {
   constructor(config) {
     this.config = config;
     this.authorizationCode = {
@@ -16,7 +16,7 @@ class MockAuthorizationCodePKCE {
   }
 }
 
-global.AuthorizationCodePKCE = MockAuthorizationCodePKCE;
+global.AuthorizationCode = MockAuthorizationCode;
 
 // Mock other required globals
 global.fetch = jest.fn();

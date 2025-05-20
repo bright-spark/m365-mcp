@@ -45,3 +45,26 @@ This project is licensed under the terms of the LICENSE file.
 
 ## Contact
 For questions, issues, or contributions, please open an issue or pull request on GitHub.
+
+## MCP Integration
+
+You can connect this server to any MCP-compatible client (such as Cursor) using the following configuration:
+
+### Example mcp.json
+```json
+{
+  "name": "Outlook MCP Server",
+  "description": "Model Context Protocol server for Microsoft Outlook with browser-based authentication",
+  "url": "http://localhost:3000/v2/mcp",
+  "version": "1.0.0",
+  "type": "http"
+}
+```
+
+### How to Use
+1. Save the above JSON as `mcp.json`.
+2. In your MCP client (e.g., Cursor), use the "Add MCP" or "Import MCP" feature and select this file, or paste the URL directly.
+3. Make sure your server is running (`pnpm dev` or `pnpm start`).
+4. Authenticate via the browser if prompted.
+
+For more details, see the [docs/API.md](docs/API.md) and [docs/SECURITY.md](docs/SECURITY.md).

@@ -29,6 +29,9 @@ importers:
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0
+      express-rate-limit:
+        specifier: ^7.5.0
+        version: 7.5.0(express@5.1.0)
       express-session:
         specifier: ^1.18.1
         version: 1.18.1

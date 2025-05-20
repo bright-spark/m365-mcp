@@ -4,6 +4,26 @@ process.env.CLIENT_ID = 'test-client-id';
 process.env.REDIRECT_URI = 'http://localhost:3000/auth/callback';
 process.env.SESSION_SECRET = 'test-session-secret';
 
+// Create a mock app with all necessary methods as jest.fn()
+const mockApp = {
+  use: jest.fn(),
+  get: jest.fn(),
+  post: jest.fn(),
+  set: jest.fn(),
+  listen: jest.fn((port, callback) => {
+    if (callback) callback();
+    return { close: jest.fn() };
+  })
+};
+
+// Mock express to always return mockApp and provide static and json methods
+jest.mock('express', () => {
+  const express = jest.fn(() => mockApp);
+  express.static = jest.fn(() => 'static-middleware');
+  express.json = jest.fn(() => 'json-middleware');
+  return express;
+});
+
 // Mock the MCP Server
 const mockMcpServer = {
   tool: jest.fn(),
@@ -13,12 +33,11 @@ const mockMcpServer = {
 };
 
 // Mock the MCP SDK
-jest.mock('@modelcontextprotocol/sdk/server/mcp', () => ({
+jest.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
   McpServer: jest.fn().mockImplementation(() => mockMcpServer)
 }));
 
 // Mock other dependencies
-jest.mock('express');
 jest.mock('express-session');
 jest.mock('cors');
 jest.mock('helmet');
@@ -27,15 +46,15 @@ jest.mock('morgan');
 jest.mock('passport');
 jest.mock('openid-client');
 
-// Import the app after all mocks are set up
-const express = require('express');
-const app = require('../m365-mcp');
+// Import the McpServer for instanceof checks
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
-// Get the mock app instance
-const mockApp = express();
+// Import the app after all mocks are set up
+import { createApp } from '../m365-mcp.js';
 
 describe('MCP Server', () => {
   let server;
+  let app;
   
   beforeEach(() => {
     // Reset all mocks before each test
@@ -55,6 +74,9 @@ describe('MCP Server', () => {
     process.env.CLIENT_ID = 'test-client-id';
     process.env.REDIRECT_URI = 'http://localhost:3000/auth/callback';
     process.env.SESSION_SECRET = 'test-session-secret';
+
+    // Create the app after all mocks are set up
+    app = createApp();
   });
   
   afterAll(() => {
@@ -64,7 +86,7 @@ describe('MCP Server', () => {
 
   it('should initialize without errors', () => {
     expect(server).toBeDefined();
-    expect(server).toBeInstanceOf(McpServer);
+    expect(McpServer).toHaveBeenCalled();
   });
   
   describe('Tool Registration', () => {
@@ -98,9 +120,9 @@ describe('MCP Server', () => {
     
     it('should set up the /v2/mcp endpoint', () => {
       // Verify that the MCP endpoint was set up
-      expect(app.post).toHaveBeenCalledWith(
+      expect(mockApp.post).toHaveBeenCalledWith(
         '/v2/mcp',
-        expect.any(Function), // express.json() middleware
+        expect.anything(), // Accepts "json-middleware" or a function
         expect.any(Function)  // The route handler
       );
     });
