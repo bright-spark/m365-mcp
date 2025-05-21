@@ -25,6 +25,14 @@ startCommand:
         type: string
         title: "Tenant ID"
         description: "Your Tenant ID"
+  server:
+    handler: "./src/server.js"
+    methods:
+      - POST
+      - GET
+    routes:
+      - path: "/api/*"
+        handler: "handleRequest"
 build:
   dockerfile: Dockerfile
-  dockerBuildPath: . 
+  dockerBuildPath: .
