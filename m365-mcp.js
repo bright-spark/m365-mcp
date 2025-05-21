@@ -26,15 +26,16 @@ const config = {
   clientId: process.env.CLIENT_ID || 'your-client-id',
   redirectUri: process.env.REDIRECT_URI || 'http://localhost:3000/auth/callback',
   port: process.env.PORT || 3000,
-  sessionSecret: process.env.SESSION_SECRET || crypto.randomBytes(64).toString('hex')
+  sessionSecret: process.env.SESSION_SECRET || crypto.randomBytes(64).toString('hex'),
+  tenantId: process.env.TENANT_ID || 'your-tenant-id'
 };
 
 // Microsoft Graph authentication settings
 const authConfig = {
-  authorizeHost: 'https://login.microsoftonline.com/common',
-  tokenHost: 'https://login.microsoftonline.com/common',
-  authorizePath: '/oauth2/v2.0/authorize',
-  tokenPath: '/oauth2/v2.0/token'
+  authorizeHost: 'https://login.microsoftonline.com',
+  tokenHost: 'https://login.microsoftonline.com',
+  authorizePath: '/common/oauth2/v2.0/authorize',
+  tokenPath: '/common/oauth2/v2.0/token'
 };
 
 // Required Microsoft Graph scopes
@@ -691,20 +692,22 @@ function createApp() {
     };
   }
   
-  // Create the OAuth2 PKCE client
+  // Create the OAuth2 client
   const { AuthorizationCode, RefreshToken } = simpleOauth2;
   const oauth2 = new AuthorizationCode({
     client: {
-      id: config.clientId
+      id: config.clientId,
+      secret: process.env.CLIENT_SECRET || 'your-client-secret'
     },
     auth: {
-      authorizeHost: authConfig.authorizeHost,
-      authorizePath: authConfig.authorizePath,
       tokenHost: authConfig.tokenHost,
-      tokenPath: authConfig.tokenPath
+      tokenPath: authConfig.tokenPath,
+      authorizeHost: authConfig.authorizeHost,
+      authorizePath: authConfig.authorizePath
     },
     options: {
-      authorizationMethod: 'body'
+      authorizationMethod: 'body',
+      bodyFormat: 'form'
     }
   });
   
@@ -719,69 +722,74 @@ function createApp() {
   
   // Authentication routes
   app.get('/auth/login', wrapAsync(async (req, res) => {
-    // Generate and store a random state for CSRF protection
-    const state = crypto.randomBytes(16).toString('hex');
-    req.session.oauthState = state;
-    // Create the authorization URL
-    const authorizationUri = oauth2.authorizeURL({
-      redirect_uri: config.redirectUri,
-      scope: scopes.join(' '),
-      state: state
-    });
-    // Redirect the user to the authorization URL
-    res.redirect(authorizationUri);
+    try {
+      // Generate and store a random state for CSRF protection
+      const state = crypto.randomBytes(16).toString('hex');
+      req.session.oauthState = state;
+      
+      // Create the authorization URL
+      const authorizationUri = oauth2.authorizeURL({
+        redirect_uri: config.redirectUri,
+        scope: scopes.join(' '),
+        state: state,
+        response_mode: 'form_post'
+      });
+      
+      console.log('Redirecting to authorization URL:', authorizationUri);
+      res.redirect(authorizationUri);
+    } catch (error) {
+      console.error('Error in /auth/login:', error);
+      res.status(500).send('Authentication error: ' + error.message);
+    }
   }));
 
   app.get('/auth/callback', wrapAsync(async (req, res) => {
-    const { code, state } = req.query;
-    // Verify state parameter for CSRF protection
-    if (state !== req.session.oauthState) {
-      return res.status(403).send('State validation failed');
+    try {
+      const { code, state, error, error_description } = req.query;
+      
+      // Verify state parameter for CSRF protection
+      if (state !== req.session.oauthState) {
+        return res.status(403).send('State validation failed');
+      }
+      
+      if (error) {
+        throw new Error(`Authentication failed: ${error_description || error}`);
+      }
+      
+      if (!code) {
+        throw new Error('No authorization code received');
+      }
+      
+      // Exchange the authorization code for an access token
+      const tokenParams = {
+        code,
+        redirect_uri: config.redirectUri,
+        scope: scopes.join(' ')
+      };
+      
+      console.log('Exchanging code for token with params:', {
+        ...tokenParams,
+        code: '***',
+        client_id: config.clientId,
+        client_secret: '***'
+      });
+      
+      const token = await oauth2.getToken(tokenParams);
+      
+      // Store the token in memory (in production, use a secure storage)
+      const userId = crypto.randomBytes(16).toString('hex');
+      userTokens[userId] = token;
+      
+      // Store user ID in session
+      req.session.userId = userId;
+      
+      // Redirect to the main page
+      res.redirect('/');
+    } catch (error) {
+      console.error('Error in /auth/callback:', error);
+      res.status(500).send(`Authentication error: ${error.message}`);
     }
-    // Exchange the authorization code for an access token
-    const tokenParams = {
-      code,
-      redirect_uri: config.redirectUri,
-      scope: scopes.join(' ')
-    };
-    const token = await oauth2.getToken(tokenParams);
-    // Store the token in memory (in production, use a more secure storage method)
-    const userId = crypto.randomBytes(16).toString('hex');
-    userTokens[userId] = token;
-    req.session.userId = userId;
-    // Redirect to a success page
-    res.redirect('/auth/success');
   }));
-
-  app.get('/auth/success', (req, res) => {
-    if (!req.session.userId || !userTokens[req.session.userId]) {
-      return res.redirect('/auth/login');
-    }
-    
-    res.send(`
-      <html>
-        <head>
-          <title>Authentication Successful</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              text-align: center;
-              margin-top: 50px;
-            }
-            .success {
-              color: green;
-              font-size: 24px;
-              margin-bottom: 20px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="success">✓ Successfully authenticated with Microsoft Outlook</div>
-          <p>You can now close this window and use the MCP server.</p>
-        </body>
-      </html>
-    `);
-  });
   
   app.get('/auth/status', (req, res) => {
     const isAuthenticated = !!(req.session.userId && userTokens[req.session.userId]);

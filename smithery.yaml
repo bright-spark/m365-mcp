@@ -3,17 +3,28 @@ startCommand:
   type: http
   configSchema:
     type: object
-    required: ["apiKey"]
+    required: ["apiKey","clientId","clientSecret","redirectUri","tenantId"]
     properties:
       apiKey:
         type: string
         title: "API Key"
         description: "Your API key"
-      temperature:
-        type: number
-        default: 0.7
-        minimum: 0
-        maximum: 1
+      clientId:
+        type: string
+        title: "Client ID"
+        description: "Your Client ID"
+      clientSecret:
+        type: string
+        title: "Client Secret"
+        description: "Your Client Secret"
+      redirectUri:
+        type: string
+        title: "Redirect URI"
+        description: "Your Redirect URI"
+      tenantId:
+        type: string
+        title: "Tenant ID"
+        description: "Your Tenant ID"
 build:
   dockerfile: Dockerfile
   dockerBuildPath: . 
