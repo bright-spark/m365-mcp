@@ -13,10 +13,10 @@ const rl = readline.createInterface({
 
 console.log('\n');
 console.log('=============================================');
-console.log('🚀 Outlook MCP Server Setup Assistant');
+console.log('🚀 Microsoft 365 MCP Server Setup Assistant');
 console.log('=============================================');
 console.log('\n');
-console.log('This script will help you set up your Outlook MCP Server.');
+console.log('This script will help you set up your Microsoft 365 MCP Server.');
 console.log('It will guide you through the necessary steps and configuration.');
 console.log('\n');
 

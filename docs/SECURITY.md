@@ -1,6 +1,6 @@
 # Security Considerations
 
-This document outlines important security considerations for deploying and using the Outlook MCP Server.
+This document outlines important security considerations for deploying and using the Microsoft 365 MCP Server.
 
 ## Authentication Security
 

@@ -1,6 +1,6 @@
-# Contributing to Outlook MCP Server
+# Contributing to Microsoft 365 MCP Server
 
-Thank you for your interest in contributing to the Outlook MCP Server! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to the Microsoft 365 MCP Server! This document provides guidelines and instructions for contributing.
 
 ## Code of Conduct
 

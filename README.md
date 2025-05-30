@@ -2,6 +2,8 @@
 
 Welcome to the Microsoft 365 MCP project!
 
+[![smithery badge](https://smithery.ai/badge/@bright-spark/m365-mcp)](https://smithery.ai/server/@bright-spark/m365-mcp)
+
 ## Overview
 This project implements an MCP (Multi-Cloud Platform) integration for Microsoft 365. It provides tools, scripts, and configurations to interact with Microsoft 365 services in a multi-cloud or hybrid environment.
 
